@@ -91,19 +91,21 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     @Override
     public List<ReportingMessage> logEvent(CommerceEvent event) {
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
-
         if (event.getProductAction().equals(Product.ADD_TO_CART)
                 || event.getProductAction().equals(Product.ADD_TO_WISHLIST)
                 || event.getProductAction().equals(Product.CHECKOUT)
-                || event.getProductAction().equals(Product.PURCHASE)) {
+                || event.getProductAction().equals(Product.PURCHASE)
+                || event.getProductAction().equals(Product.DETAIL)) {
             Map<String, Object> eventValues = new HashMap<String, Object>();
+
+            String eventName = getEventNameMapping(event.getProductAction());
 
             if (!KitUtils.isEmpty(event.getCurrency())) {
                 eventValues.put(AFInAppEventParameterName.CURRENCY, event.getCurrency());
             }
             if (event.getProductAction().equals(Product.ADD_TO_CART)
-                    || event.getProductAction().equals(Product.ADD_TO_WISHLIST)) {
-                String eventName = event.getProductAction().equals(Product.ADD_TO_CART) ? AFInAppEventType.ADD_TO_CART : AFInAppEventType.ADD_TO_WISH_LIST;
+                    || event.getProductAction().equals(Product.ADD_TO_WISHLIST)
+                    || event.getProductAction().equals(Product.DETAIL)) {
                 if (event.getProducts().size() > 0) {
                     List<Product> productList = event.getProducts();
                     for (Product product : productList) {
@@ -122,7 +124,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                     }
                 }
             } else {
-                String eventName = event.getProductAction().equals(Product.CHECKOUT) ? AFInAppEventType.INITIATED_CHECKOUT : AFInAppEventType.PURCHASE;
                 if (event.getProducts() != null && event.getProducts().size() > 0) {
                     double totalQuantity = 0;
                     for (Product product : event.getProducts()) {
@@ -152,6 +153,23 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         }
 
         return messages;
+    }
+
+    private String getEventNameMapping(String commerceEvent) {
+        switch (commerceEvent) {
+            case Product.ADD_TO_CART:
+                return AFInAppEventType.ADD_TO_CART;
+            case Product.ADD_TO_WISHLIST:
+                return AFInAppEventType.ADD_TO_WISH_LIST;
+            case Product.DETAIL:
+                return AFInAppEventType.CONTENT_VIEW;
+            case Product.CHECKOUT:
+                return AFInAppEventType.INITIATED_CHECKOUT;
+            case Product.PURCHASE:
+                return AFInAppEventType.PURCHASE;
+            default:
+                return commerceEvent;
+        }
     }
 
     @Override
