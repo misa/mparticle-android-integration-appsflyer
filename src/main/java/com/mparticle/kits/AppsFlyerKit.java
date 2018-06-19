@@ -22,6 +22,8 @@ import com.mparticle.commerce.Product;
 import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.kits_core.KitIntegration;
+import com.mparticle.kits_core.ReportingMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +39,7 @@ import java.util.Map;
 /**
  * mParticle Kit wrapper for the AppsFlyer SDK
  */
-public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener, KitIntegration.ActivityListener {
+public class AppsFlyerKit extends AbstractKitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener, KitIntegration.ActivityListener {
 
     private static final String DEV_KEY = "devKey";
     private static final String APPSFLYERID_INTEGRATION_KEY = "appsflyer_id_integration_setting";
@@ -64,7 +66,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     }
 
     @Override
-    protected List<ReportingMessage> onKitCreate(Map<String, String> setting, Context context) {
+    public List<ReportingMessage> onKitCreate(Map<String, String> setting, Context context) {
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
         AppsFlyerLib.getInstance().init(getSettings().get(DEV_KEY), this);
         AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext());
@@ -73,7 +75,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         integrationAttributes.put(APPSFLYERID_INTEGRATION_KEY, AppsFlyerLib.getInstance().getAppsFlyerUID(context));
         setIntegrationAttributes(integrationAttributes);
         List<ReportingMessage> messages = new ArrayList<ReportingMessage>();
-        messages.add(new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null));
+        messages.add(new ReportingMessageImpl(this, ReportingMessageImpl.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null));
         return messages;
     }
 
@@ -128,7 +130,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                             productEventValues.put(AFInAppEventParameterName.CONTENT_TYPE, product.getCategory());
                         }
                         AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, productEventValues);
-                        messages.add(ReportingMessage.fromEvent(this, event));
+                        messages.add(ReportingMessageImpl.fromEvent(this, event));
                     }
                 }
             } else {
@@ -153,7 +155,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                     }
                 }
                 AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, eventValues);
-                messages.add(ReportingMessage.fromEvent(this, event));
+                messages.add(ReportingMessageImpl.fromEvent(this, event));
             }
         } else {
             List<MPEvent> eventList = CommerceEventUtils.expand(event);
@@ -161,7 +163,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
                 for (int i = 0; i < eventList.size(); i++) {
                     try {
                         logEvent(eventList.get(i));
-                        messages.add(ReportingMessage.fromEvent(this, event));
+                        messages.add(ReportingMessageImpl.fromEvent(this, event));
                     } catch (Exception e) {
                         Logger.warning("Failed to call logCustomEvent to AppsFlyer kit: " + e.toString());
                     }
@@ -180,7 +182,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         }
         AppsFlyerLib.getInstance().trackEvent(getContext(), event.getEventName(), hashMap);
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
-        messages.add(ReportingMessage.fromEvent(this, event));
+        messages.add(ReportingMessageImpl.fromEvent(this, event));
         return messages;
     }
 
@@ -194,7 +196,7 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(optOutStatus);
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(
-                new ReportingMessage(this, ReportingMessage.MessageType.OPT_OUT, System.currentTimeMillis(), null)
+                new ReportingMessageImpl(this, ReportingMessageImpl.MessageType.OPT_OUT, System.currentTimeMillis(), null)
                         .setOptOut(optOutStatus)
         );
         return messageList;
