@@ -22,8 +22,8 @@ import com.mparticle.commerce.Product;
 import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.kits_core.KitIntegration;
-import com.mparticle.kits_core.ReportingMessage;
+import com.mparticle.kits.core.KitIntegration;
+import com.mparticle.kits.core.ReportingMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -269,7 +269,7 @@ public class AppsFlyerKit extends AbstractKitIntegration implements KitIntegrati
                 .setParameters(jsonResult)
                 .setServiceProviderId(getConfiguration().getKitId());
         mLatestConversionData = result;
-        getKitManager().onResult(result);
+        getAttributionListener().onResult(result);
 
     }
 
@@ -279,7 +279,7 @@ public class AppsFlyerKit extends AbstractKitIntegration implements KitIntegrati
             AttributionError error = new AttributionError()
                     .setMessage(conversionFailure)
                     .setServiceProviderId(getConfiguration().getKitId());
-            getKitManager().onError(error);
+            getAttributionListener().onError(error);
         }
     }
 
@@ -300,7 +300,7 @@ public class AppsFlyerKit extends AbstractKitIntegration implements KitIntegrati
                 .setParameters(jsonResult)
                 .setServiceProviderId(getConfiguration().getKitId());
         mLatestOpenData = result;
-        getKitManager().onResult(result);
+        getAttributionListener().onResult(result);
     }
 
     @Override
@@ -309,7 +309,7 @@ public class AppsFlyerKit extends AbstractKitIntegration implements KitIntegrati
             AttributionError error = new AttributionError()
                     .setMessage(attributionFailure)
                     .setServiceProviderId(getConfiguration().getKitId());
-            (getKitManager()).onError(error);
+            (getAttributionListener()).onError(error);
         }
     }
 
